@@ -542,7 +542,7 @@
                     x: avgX,
                     y: avgY,
                     frequency: group.count,
-                    size: 100 + Math.min(700, group.count * 8) * 1.5 // 50% larger bubbles as requested
+                    size: 100 + Math.min(700, group.count * 8) * 1.95 // 50% + 30% = 95% larger bubbles
                 });
             });
 
@@ -562,7 +562,7 @@
                 text: plotData.map(d => `${d.product}<br>Responses: ${d.frequency}`),
                 mode: 'markers+text',
                 marker: {
-                    size: plotData.map(d => Math.sqrt(d.size) / 2), // Adjust size for Plotly
+                    size: plotData.map(d => Math.sqrt(d.size) / 2 * 1.3), // 30% larger bubbles for Plotly
                     color: plotData.map((d, i) => {
                         // Color by brand (first word of product name)
                         const brand = d.product.split(/[\s-]/)[0];
@@ -693,44 +693,183 @@
             indicator.classList.add(`status-${status}`);
         }
 
-        // Load sample data function
+        // Load sample data function with frequency data for realistic bubble sizing
         function loadSampleData() {
-            const sampleCSV = `phone_model,design,price_value,camera_quality,battery_life,performance,build_quality,user_interface,innovation
-iPhone 15 Pro,8.5,6.2,9.1,7.8,9.2,8.9,8.7,8.4
-iPhone 15,8.2,6.8,8.7,7.5,8.8,8.6,8.5,8.1
-Samsung Galaxy S24 Ultra,8.4,6.5,9.0,8.1,8.9,8.7,8.2,8.6
-Samsung Galaxy S24,8.1,7.2,8.5,8.0,8.4,8.3,8.0,8.2
-Samsung Galaxy A54,7.5,7.9,7.8,8.5,7.6,7.8,7.7,7.2
-Google Pixel 8 Pro,7.9,7.1,8.8,7.4,8.1,8.2,8.4,8.7
-Google Pixel 8,7.6,7.8,8.5,7.2,7.9,8.0,8.2,8.4
-OnePlus 12,8.0,7.6,8.2,8.3,8.7,8.4,7.9,8.1
-OnePlus 11,7.8,7.9,8.0,8.1,8.3,8.1,7.8,7.8
-Xiaomi 14 Pro,7.7,8.5,8.1,8.2,8.0,7.9,7.5,8.3
-Xiaomi Redmi Note 13,6.9,8.8,7.2,8.7,7.1,7.2,7.1,7.0
-Nothing Phone 2,7.4,7.3,7.6,7.9,7.5,7.6,8.0,8.9`;
+            const sampleData = [
+                // iPhone 15 Pro - High popularity (85 responses)
+                ...Array.from({length: 85}, (_, i) => ({
+                    phone_model: 'iPhone 15 Pro',
+                    design: (8.5 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    price_value: (6.2 + (Math.random() - 0.5) * 1.2).toFixed(1),
+                    camera_quality: (9.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (7.8 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    performance: (9.2 + (Math.random() - 0.5) * 0.6).toFixed(1),
+                    build_quality: (8.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (8.7 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.4 + (Math.random() - 0.5) * 0.8).toFixed(1)
+                })),
+                
+                // Samsung Galaxy S24 Ultra - High popularity (72 responses)
+                ...Array.from({length: 72}, (_, i) => ({
+                    phone_model: 'Samsung Galaxy S24 Ultra',
+                    design: (8.4 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    price_value: (6.5 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    camera_quality: (9.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    performance: (8.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    build_quality: (8.7 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (8.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.6 + (Math.random() - 0.5) * 0.8).toFixed(1)
+                })),
+                
+                // Samsung Galaxy A54 - Medium popularity (65 responses)
+                ...Array.from({length: 65}, (_, i) => ({
+                    phone_model: 'Samsung Galaxy A54',
+                    design: (7.5 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    price_value: (7.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    camera_quality: (7.8 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    battery_life: (8.5 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    performance: (7.6 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    build_quality: (7.8 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    user_interface: (7.7 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    innovation: (7.2 + (Math.random() - 0.5) * 1.0).toFixed(1)
+                })),
+                
+                // iPhone 15 - Medium popularity (58 responses)
+                ...Array.from({length: 58}, (_, i) => ({
+                    phone_model: 'iPhone 15',
+                    design: (8.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    price_value: (6.8 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    camera_quality: (8.7 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (7.5 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    performance: (8.8 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    build_quality: (8.6 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (8.5 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1)
+                })),
+                
+                // Samsung Galaxy S24 - Medium popularity (52 responses)
+                ...Array.from({length: 52}, (_, i) => ({
+                    phone_model: 'Samsung Galaxy S24',
+                    design: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    price_value: (7.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    camera_quality: (8.5 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (8.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    performance: (8.4 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    build_quality: (8.3 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (8.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.2 + (Math.random() - 0.5) * 0.8).toFixed(1)
+                })),
+                
+                // Google Pixel 8 Pro - Lower popularity (45 responses)
+                ...Array.from({length: 45}, (_, i) => ({
+                    phone_model: 'Google Pixel 8 Pro',
+                    design: (7.9 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    price_value: (7.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    camera_quality: (8.8 + (Math.random() - 0.5) * 0.6).toFixed(1),
+                    battery_life: (7.4 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    performance: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    build_quality: (8.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (8.4 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.7 + (Math.random() - 0.5) * 0.6).toFixed(1)
+                })),
+                
+                // Google Pixel 8 - Lower popularity (38 responses)
+                ...Array.from({length: 38}, (_, i) => ({
+                    phone_model: 'Google Pixel 8',
+                    design: (7.6 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    price_value: (7.8 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    camera_quality: (8.5 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (7.2 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    performance: (7.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    build_quality: (8.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (8.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.4 + (Math.random() - 0.5) * 0.8).toFixed(1)
+                })),
+                
+                // OnePlus 12 - Lower popularity (35 responses)
+                ...Array.from({length: 35}, (_, i) => ({
+                    phone_model: 'OnePlus 12',
+                    design: (8.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    price_value: (7.6 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    camera_quality: (8.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (8.3 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    performance: (8.7 + (Math.random() - 0.5) * 0.6).toFixed(1),
+                    build_quality: (8.4 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (7.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1)
+                })),
+                
+                // Xiaomi 14 Pro - Lower popularity (32 responses)  
+                ...Array.from({length: 32}, (_, i) => ({
+                    phone_model: 'Xiaomi 14 Pro',
+                    design: (7.7 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    price_value: (8.5 + (Math.random() - 0.5) * 0.6).toFixed(1),
+                    camera_quality: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (8.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    performance: (8.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    build_quality: (7.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (7.5 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    innovation: (8.3 + (Math.random() - 0.5) * 0.8).toFixed(1)
+                })),
+                
+                // OnePlus 11 - Low popularity (28 responses)
+                ...Array.from({length: 28}, (_, i) => ({
+                    phone_model: 'OnePlus 11',
+                    design: (7.8 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    price_value: (7.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    camera_quality: (8.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    battery_life: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    performance: (8.3 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    build_quality: (8.1 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    user_interface: (7.8 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    innovation: (7.8 + (Math.random() - 0.5) * 1.0).toFixed(1)
+                })),
+                
+                // Nothing Phone 2 - Low popularity (25 responses)
+                ...Array.from({length: 25}, (_, i) => ({
+                    phone_model: 'Nothing Phone 2',
+                    design: (7.4 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    price_value: (7.3 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    camera_quality: (7.6 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    battery_life: (7.9 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    performance: (7.5 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    build_quality: (7.6 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    user_interface: (8.0 + (Math.random() - 0.5) * 0.8).toFixed(1),
+                    innovation: (8.9 + (Math.random() - 0.5) * 0.4).toFixed(1)
+                })),
+                
+                // Xiaomi Redmi Note 13 - Low popularity (22 responses)
+                ...Array.from({length: 22}, (_, i) => ({
+                    phone_model: 'Xiaomi Redmi Note 13',
+                    design: (6.9 + (Math.random() - 0.5) * 1.2).toFixed(1),
+                    price_value: (8.8 + (Math.random() - 0.5) * 0.4).toFixed(1),
+                    camera_quality: (7.2 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    battery_life: (8.7 + (Math.random() - 0.5) * 0.6).toFixed(1),
+                    performance: (7.1 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    build_quality: (7.2 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    user_interface: (7.1 + (Math.random() - 0.5) * 1.0).toFixed(1),
+                    innovation: (7.0 + (Math.random() - 0.5) * 1.0).toFixed(1)
+                }))
+            ];
 
-            // Parse the sample data
-            Papa.parse(sampleCSV, {
-                header: true,
-                skipEmptyLines: true,  // Add this to handle empty lines
-                complete: function(results) {
-                    if (results.errors.length > 0) {
-                        console.log('Sample data errors:', results.errors);
-                        alert('Error loading sample data: ' + results.errors[0].message);
-                        return;
-                    }
-                    
-                    surveyData = results.data.filter(row => {
-                        // More robust filtering
-                        return Object.values(row).some(val => val && val.toString().trim() !== '' && val.toString().trim() !== '');
-                    });
-                    
-                    displayDataPreview();
-                    analyzeData();
-                    updateStepStatus('step2', 'completed');
-                    updateStepStatus('step3', 'active');
-                }
+            // Shuffle the data to make it more realistic
+            const shuffledData = sampleData.sort(() => Math.random() - 0.5);
+            
+            surveyData = shuffledData;
+            
+            console.log('Generated sample data with', surveyData.length, 'total responses');
+            console.log('Products and response counts:');
+            const productCounts = {};
+            surveyData.forEach(row => {
+                productCounts[row.phone_model] = (productCounts[row.phone_model] || 0) + 1;
             });
+            console.log(productCounts);
+            
+            displayDataPreview();
+            analyzeData();
+            updateStepStatus('step2', 'completed');
+            updateStepStatus('step3', 'active');
         }
 
         // Event listeners

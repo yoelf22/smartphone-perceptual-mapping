@@ -1,13 +1,31 @@
-phone_model,design,price_value,camera_quality,battery_life,performance,build_quality,user_interface,innovation
-iPhone 15 Pro,8.5,6.2,9.1,7.8,9.2,8.9,8.7,8.4
-iPhone 15,8.2,6.8,8.7,7.5,8.8,8.6,8.5,8.1
-Samsung Galaxy S24 Ultra,8.4,6.5,9.0,8.1,8.9,8.7,8.2,8.6
-Samsung Galaxy S24,8.1,7.2,8.5,8.0,8.4,8.3,8.0,8.2
-Samsung Galaxy A54,7.5,7.9,7.8,8.5,7.6,7.8,7.7,7.2
-Google Pixel 8 Pro,7.9,7.1,8.8,7.4,8.1,8.2,8.4,8.7
-Google Pixel 8,7.6,7.8,8.5,7.2,7.9,8.0,8.2,8.4
-OnePlus 12,8.0,7.6,8.2,8.3,8.7,8.4,7.9,8.1
-OnePlus 11,7.8,7.9,8.0,8.1,8.3,8.1,7.8,7.8
-Xiaomi 14 Pro,7.7,8.5,8.1,8.2,8.0,7.9,7.5,8.3
-Xiaomi Redmi Note 13,6.9,8.8,7.2,8.7,7.1,7.2,7.1,7.0
-Nothing Phone 2,7.4,7.3,7.6,7.9,7.5,7.6,8.0,8.9
+respondent_id,phone_model,design,price_value,camera_quality,battery_life,performance,build_quality,user_interface,innovation
+1,iPhone 15 Pro,8.2,6.5,9.0,7.5,9.1,8.7,8.9,8.2
+2,iPhone 15 Pro,8.8,5.9,9.2,8.1,9.3,9.1,8.5,8.6
+3,Samsung Galaxy S24 Ultra,8.6,6.2,8.8,8.3,8.7,8.5,8.4,8.8
+4,Samsung Galaxy S24 Ultra,8.2,6.8,9.2,7.9,9.1,8.9,8.0,8.4
+5,Samsung Galaxy A54,7.3,8.1,7.6,8.7,7.4,7.6,7.5,7.0
+6,Samsung Galaxy A54,7.7,7.7,8.0,8.3,7.8,8.0,7.9,7.4
+7,iPhone 15,8.0,7.2,8.5,7.2,8.6,8.4,8.7,7.9
+8,iPhone 15,8.4,6.4,8.9,7.8,9.0,8.8,8.3,8.3
+9,Samsung Galaxy S24,8.3,7.0,8.3,8.2,8.2,8.1,8.2,8.0
+10,Samsung Galaxy S24,7.9,7.4,8.7,7.8,8.6,8.5,7.8,8.4
+11,Google Pixel 8 Pro,7.7,7.3,8.6,7.1,7.9,8.0,8.6,8.5
+12,Google Pixel 8 Pro,8.1,6.9,9.0,7.7,8.3,8.4,8.2,8.9
+13,Google Pixel 8,7.4,8.0,8.3,6.9,7.7,7.8,8.4,8.2
+14,Google Pixel 8,7.8,7.6,8.7,7.5,8.1,8.2,8.0,8.6
+15,OnePlus 12,8.2,7.4,8.0,8.5,8.5,8.2,7.7,7.9
+16,OnePlus 12,7.8,7.8,8.4,8.1,8.9,8.6,8.1,8.3
+17,Xiaomi 14 Pro,7.5,8.7,7.9,8.4,7.8,7.7,7.3,8.1
+18,Xiaomi 14 Pro,7.9,8.3,8.3,8.0,8.2,8.1,7.7,8.5
+19,OnePlus 11,7.6,8.1,7.8,8.3,8.1,7.9,7.6,7.6
+20,OnePlus 11,8.0,7.7,8.2,7.9,8.5,8.3,8.0,8.0
+21,Nothing Phone 2,7.2,7.5,7.4,8.1,7.3,7.4,8.2,8.7
+22,Nothing Phone 2,7.6,7.1,7.8,7.7,7.7,7.8,7.8,9.1
+23,Xiaomi Redmi Note 13,6.7,8.6,7.0,8.5,6.9,7.0,6.9,6.8
+24,Xiaomi Redmi Note 13,7.1,9.0,7.4,8.9,7.3,7.4,7.3,7.2
+25,iPhone 15 Pro,8.7,6.0,9.3,7.9,9.0,8.8,8.6,8.5
+26,Samsung Galaxy S24 Ultra,8.1,6.7,8.7,8.2,9.2,8.6,8.1,8.7
+27,Samsung Galaxy A54,7.8,7.6,8.1,8.2,7.5,7.7,8.0,7.1
+28,iPhone 15,8.1,6.9,8.8,7.7,8.7,8.5,8.4,8.2
+29,Samsung Galaxy S24,8.0,7.3,8.6,7.9,8.5,8.4,7.9,8.1
+30,Google Pixel 8 Pro,8.0,7.0,8.9,7.3,8.2,8.1,8.5,8.8
