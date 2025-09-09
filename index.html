@@ -228,7 +228,15 @@
                 <strong>💡 Tip:</strong> This step helps identify key dimensions for your perceptual map. You can skip this and proceed directly to survey data upload.
             </div>
             
-            <button onclick="skipToSurveyData()">Skip to Survey Data →</button>
+            <div id="text-word-counter" class="word-counter">0 words</div>
+            
+            <button id="process-text-btn" disabled>🤖 Process Text & Extract Dimensions</button>
+            <button onclick="skipToSurveyData()" style="margin-left: 10px;">Skip to Survey Data →</button>
+            
+            <div id="extracted-dimensions" class="analysis-summary hidden">
+                <h4>🎯 Extracted Dimensions:</h4>
+                <div id="dimensions-list"></div>
+            </div>
         </div>
 
         <!-- Step 2: Survey Data Upload -->
@@ -425,6 +433,9 @@
 
         function analyzeData() {
             if (!surveyData || surveyData.length === 0) return;
+
+            // Clear any previous extracted dimensions from qualitative analysis
+            document.getElementById('extracted-dimensions').classList.add('hidden');
 
             // Find identifier column (product names)
             const columns = Object.keys(surveyData[0]);
@@ -926,6 +937,120 @@
                 alert('Text file loaded! You can now review and edit the content, then proceed to survey data.');
             };
             reader.readAsText(file);
+        }
+
+        // Real-time text validation and word counting
+        document.getElementById('qualitative-text').addEventListener('input', function() {
+            const text = this.value;
+            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            
+            // Update counter
+            document.getElementById('text-word-counter').textContent = wordCount.toLocaleString() + ' words';
+            
+            // Enable/disable process button based on word count
+            const processBtn = document.getElementById('process-text-btn');
+            processBtn.disabled = wordCount < 50; // Minimum 50 words for processing
+            
+            if (wordCount < 50) {
+                processBtn.textContent = '🤖 Process Text & Extract Dimensions (min 50 words)';
+            } else {
+                processBtn.textContent = '🤖 Process Text & Extract Dimensions';
+            }
+        });
+
+        // Process qualitative text and extract dimensions
+        document.getElementById('process-text-btn').addEventListener('click', function() {
+            const text = document.getElementById('qualitative-text').value;
+            if (!text || text.trim().split(/\s+/).length < 50) {
+                alert('Please enter at least 50 words of qualitative text.');
+                return;
+            }
+            
+            this.textContent = '🔄 Processing...';
+            this.disabled = true;
+            
+            // Simple client-side dimension extraction using keyword analysis
+            extractDimensionsFromText(text);
+        });
+
+        // Client-side dimension extraction function
+        function extractDimensionsFromText(text) {
+            const lowerText = text.toLowerCase();
+            
+            // Common perceptual mapping dimensions with their keywords
+            const dimensionKeywords = {
+                'Design_Quality': ['design', 'appearance', 'look', 'aesthetic', 'visual', 'beautiful', 'attractive', 'style', 'elegant', 'sleek'],
+                'Price_Value': ['price', 'cost', 'value', 'money', 'expensive', 'cheap', 'affordable', 'budget', 'worth', 'pricing'],
+                'Performance': ['fast', 'slow', 'speed', 'performance', 'quick', 'responsive', 'lag', 'smooth', 'powerful', 'efficient'],
+                'Quality': ['quality', 'build', 'durable', 'solid', 'reliable', 'sturdy', 'robust', 'premium', 'cheap', 'flimsy'],
+                'Innovation': ['innovative', 'new', 'advanced', 'cutting-edge', 'modern', 'technology', 'features', 'unique', 'revolutionary'],
+                'User_Experience': ['easy', 'difficult', 'user-friendly', 'intuitive', 'complex', 'simple', 'usable', 'experience', 'interface'],
+                'Brand_Trust': ['trust', 'brand', 'reputation', 'reliable', 'credible', 'established', 'known', 'famous', 'popular'],
+                'Customer_Service': ['service', 'support', 'help', 'assistance', 'customer', 'staff', 'helpful', 'responsive', 'care'],
+                'Durability': ['durable', 'last', 'lasting', 'strong', 'break', 'fragile', 'sturdy', 'robust', 'long-term'],
+                'Convenience': ['convenient', 'easy', 'accessible', 'simple', 'hassle', 'effort', 'quick', 'straightforward']
+            };
+            
+            // Count keyword occurrences for each dimension
+            const dimensionScores = {};
+            Object.keys(dimensionKeywords).forEach(dimension => {
+                let score = 0;
+                dimensionKeywords[dimension].forEach(keyword => {
+                    const regex = new RegExp('\\b' + keyword + '\\w*\\b', 'gi');
+                    const matches = lowerText.match(regex);
+                    if (matches) {
+                        score += matches.length;
+                    }
+                });
+                dimensionScores[dimension] = score;
+            });
+            
+            // Sort dimensions by relevance (score)
+            const extractedDimensions = Object.entries(dimensionScores)
+                .filter(([dim, score]) => score > 0)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8) // Top 8 dimensions
+                .map(([dim, score]) => ({
+                    name: dim,
+                    score: score,
+                    displayName: dim.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                }));
+            
+            // Display extracted dimensions
+            displayExtractedDimensions(extractedDimensions);
+            
+            // Reset the process button
+            const processBtn = document.getElementById('process-text-btn');
+            processBtn.textContent = '✅ Dimensions Extracted';
+            processBtn.disabled = false;
+            
+            // Update step status
+            updateStepStatus('step1', 'completed');
+            updateStepStatus('step2', 'active');
+        }
+
+        // Display extracted dimensions
+        function displayExtractedDimensions(dimensions) {
+            const dimensionsDiv = document.getElementById('dimensions-list');
+            const extractedDiv = document.getElementById('extracted-dimensions');
+            
+            if (dimensions.length === 0) {
+                dimensionsDiv.innerHTML = '<p class="warning-box">No clear dimensions found in the text. Consider adding more descriptive content or skip to manual survey data upload.</p>';
+            } else {
+                let html = '<p><strong>Found ' + dimensions.length + ' relevant dimensions:</strong></p>';
+                html += '<div class="keyword-list">';
+                dimensions.forEach(dim => {
+                    html += `<span class="keyword-tag" style="position: relative;">
+                        ${dim.displayName}
+                        <small style="position: absolute; top: -8px; right: -8px; background: #ff6b6b; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center;">${dim.score}</small>
+                    </span>`;
+                });
+                html += '</div>';
+                html += '<p style="margin-top: 15px;"><strong>💡 Next:</strong> Use these dimensions as column names in your CSV survey data, or upload survey data with different dimensions.</p>';
+                dimensionsDiv.innerHTML = html;
+            }
+            
+            extractedDiv.classList.remove('hidden');
         }
 
         // Initialize
