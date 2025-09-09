@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Session data (may contain sensitive info)
+session_data/
+
+# Test files
+test_*.csv
+test_*.txt
+*_test.py
+comprehensive_test.py
+minimal_test.py
+
+# Results (optional - can be included for demo)
+# results/
