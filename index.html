@@ -967,39 +967,7 @@ Start typing or paste text here..."></textarea>
             reader.readAsText(file);
         }
 
-        // Real-time text validation and word counting
-        document.getElementById('qualitative-text').addEventListener('input', function() {
-            const text = this.value;
-            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-            
-            // Update counter
-            document.getElementById('text-word-counter').textContent = wordCount.toLocaleString() + ' words';
-            
-            // Enable/disable process button based on word count
-            const processBtn = document.getElementById('process-text-btn');
-            processBtn.disabled = wordCount < 50; // Minimum 50 words for processing
-            
-            if (wordCount < 50) {
-                processBtn.textContent = '🤖 Process Text & Extract Dimensions (min 50 words)';
-            } else {
-                processBtn.textContent = '🤖 Process Text & Extract Dimensions';
-            }
-        });
-
-        // Process qualitative text and extract dimensions
-        document.getElementById('process-text-btn').addEventListener('click', function() {
-            const text = document.getElementById('qualitative-text').value;
-            if (!text || text.trim().split(/\s+/).length < 50) {
-                alert('Please enter at least 50 words of qualitative text.');
-                return;
-            }
-            
-            this.textContent = '🔄 Processing...';
-            this.disabled = true;
-            
-            // Simple client-side dimension extraction using keyword analysis
-            extractDimensionsFromText(text);
-        });
+        // Event listeners will be set up in DOMContentLoaded
 
         // Client-side dimension extraction function
         function extractDimensionsFromText(text) {
@@ -1081,9 +1049,67 @@ Start typing or paste text here..."></textarea>
             extractedDiv.classList.remove('hidden');
         }
 
-        // Initialize
-        setupFileUpload();
-        setupTextFileUpload();
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Check if elements exist
+            const textArea = document.getElementById('qualitative-text');
+            const wordCounter = document.getElementById('text-word-counter');
+            const processBtn = document.getElementById('process-text-btn');
+            
+            console.log('Elements found:', {
+                textArea: !!textArea,
+                wordCounter: !!wordCounter,
+                processBtn: !!processBtn
+            });
+            
+            setupFileUpload();
+            setupTextFileUpload();
+            
+            // Force trigger the textarea event listener setup
+            if (textArea) {
+                console.log('Setting up textarea event listener...');
+                textArea.addEventListener('input', function() {
+                    const text = this.value;
+                    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+                    
+                    console.log('Text changed, word count:', wordCount);
+                    
+                    // Update counter
+                    if (wordCounter) {
+                        wordCounter.textContent = wordCount.toLocaleString() + ' words';
+                    }
+                    
+                    // Enable/disable process button based on word count
+                    if (processBtn) {
+                        processBtn.disabled = wordCount < 50;
+                        
+                        if (wordCount < 50) {
+                            processBtn.textContent = '🤖 Process Text & Extract Dimensions (min 50 words)';
+                        } else {
+                            processBtn.textContent = '🤖 Process Text & Extract Dimensions';
+                        }
+                    }
+                });
+            }
+            
+            // Force trigger the process button event listener
+            if (processBtn) {
+                processBtn.addEventListener('click', function() {
+                    const text = document.getElementById('qualitative-text').value;
+                    if (!text || text.trim().split(/\s+/).length < 50) {
+                        alert('Please enter at least 50 words of qualitative text.');
+                        return;
+                    }
+                    
+                    this.textContent = '🔄 Processing...';
+                    this.disabled = true;
+                    
+                    extractDimensionsFromText(text);
+                });
+            }
+        });
     </script>
 </body>
 </html>
