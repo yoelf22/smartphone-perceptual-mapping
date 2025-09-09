@@ -961,7 +961,16 @@ Start typing or paste text here..."></textarea>
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                document.getElementById('qualitative-text').value = e.target.result;
+                const textarea = document.getElementById('qualitative-text');
+                textarea.value = e.target.result;
+                
+                // Trigger the input event to update word counter and button state
+                const inputEvent = new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
+                });
+                textarea.dispatchEvent(inputEvent);
+                
                 alert('Text file loaded! You can now review and edit the content, then proceed to survey data.');
             };
             reader.readAsText(file);
