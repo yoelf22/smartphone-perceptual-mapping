@@ -16,7 +16,7 @@ An interactive web-based tool for creating perceptual maps from survey data. Upl
 
 ## 🚀 Live Demo
 
-**[Try it now on GitHub Pages →](https://yourgithub.github.io/smartphone-perceptual-mapping)**
+**[Try it now on GitHub Pages →](https://yoelf22.github.io/smartphone-perceptual-mapping/)**
 
 ## 🚀 Quick Start (30 seconds)
 
