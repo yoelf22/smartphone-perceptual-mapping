@@ -1,0 +1,34 @@
+service,category,popularity,content_quality,user_interface,performance,price_value,brand_trust,feature_richness,customer_support,innovation
+Netflix,Entertainment,85,9,8,8,6,8,8,7,7
+Spotify,Music,82,8,9,8,8,7,9,8,8
+Disney+,Entertainment,78,8,8,7,5,8,7,7,6
+Amazon Prime,Entertainment,75,7,7,8,7,8,8,8,7
+YouTube Premium,Video,70,7,8,9,6,7,7,6,7
+Apple Music,Music,68,8,9,8,7,9,8,9,8
+Hulu,Entertainment,65,7,7,7,6,7,7,7,6
+HBO Max,Entertainment,62,9,8,7,4,8,8,8,8
+Paramount+,Entertainment,58,6,7,7,5,7,6,6,5
+Peacock,Entertainment,55,6,6,7,7,6,6,6,5
+Tidal,Music,45,8,7,7,4,6,7,6,7
+Apple TV+,Entertainment,42,8,9,8,3,9,7,8,8
+Crunchyroll,Anime,40,7,6,6,6,6,8,7,6
+Discovery+,Documentary,38,7,6,7,6,6,6,6,5
+Showtime,Entertainment,35,8,7,7,3,7,7,7,6
+Starz,Entertainment,32,7,6,6,3,6,6,6,5
+ESPN+,Sports,30,6,7,8,7,7,7,7,6
+FuboTV,Sports,28,6,6,7,4,6,7,6,6
+Sling TV,TV,25,5,6,6,6,6,6,6,5
+YouTube TV,TV,68,7,8,8,5,7,8,7,7
+Pandora,Music,40,6,7,7,8,6,6,6,5
+SoundCloud,Music,35,5,6,6,8,5,6,5,6
+Deezer,Music,28,7,7,7,6,6,7,6,6
+iHeartRadio,Radio,32,5,6,7,8,6,6,6,5
+TuneIn,Radio,25,5,5,6,7,5,5,5,5
+Audible,Audiobooks,60,8,8,7,5,8,7,8,7
+Kindle Unlimited,Reading,55,7,8,7,6,8,7,7,6
+Scribd,Reading,30,6,6,6,7,6,6,6,5
+MasterClass,Education,50,9,8,7,4,7,8,8,8
+Skillshare,Education,45,7,7,7,7,6,7,7,7
+Coursera,Education,65,8,7,7,6,7,8,8,8
+Udemy,Education,58,7,6,7,8,6,7,7,7
+LinkedIn Learning,Education,52,7,8,7,5,8,7,8,7

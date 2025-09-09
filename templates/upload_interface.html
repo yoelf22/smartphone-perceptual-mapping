@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perceptual Mapping Data Upload</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .step { margin-bottom: 30px; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        .step.active { border-color: #4CAF50; }
+        .step.completed { border-color: #4CAF50; background-color: #f8fff8; }
+        .step-header { font-size: 1.4em; font-weight: bold; margin-bottom: 10px; color: #333; }
+        .progress-bar { width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: #4CAF50; transition: width 0.3s; }
+        .word-counter { font-size: 0.9em; color: #666; margin-top: 5px; }
+        .warning { color: #ff6600; }
+        .error { color: #ff0000; }
+        .success { color: #4CAF50; }
+        textarea { width: 100%; min-height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; }
+        input[type="text"], input[type="password"], select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 5px 0; }
+        button { background: #4CAF50; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        button:hover { background: #45a049; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .file-drop { border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; color: #666; margin: 10px 0; }
+        .file-drop.dragover { border-color: #4CAF50; background: #f8fff8; }
+        .hidden { display: none; }
+        .keyword-list { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
+        .keyword-tag { background: #e3f2fd; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; }
+        .analysis-summary { background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Perceptual Mapping Data Upload System</h1>
+        <p>Upload your research data to generate perceptual maps and competitive analysis.</p>
+        
+        <!-- Step 1: Qualitative Data -->
+        <div class="step active" id="step1">
+            <div class="step-header">📝 Step 1: Qualitative Data Upload</div>
+            <p><strong>Requirements:</strong> 100 - 5,000 words (recommended: 500 - 2,000)</p>
+            
+            <div class="file-drop" id="qualitative-drop">
+                <p>📁 Drag & drop text files here or click to browse</p>
+                <input type="file" id="qualitative-file" accept=".txt" style="display: none;">
+                <button onclick="document.getElementById('qualitative-file').click()">Browse Files</button>
+            </div>
+            
+            <p><strong>Or paste text directly:</strong></p>
+            <textarea id="qualitative-text" placeholder="Paste your qualitative research data here (interviews, discussions, Reddit posts, etc.)..."></textarea>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="text-progress" style="width: 0%;"></div>
+            </div>
+            <div class="word-counter" id="word-counter">0 words</div>
+            
+            <button id="validate-text-btn">Validate Text</button>
+        </div>
+        
+        <!-- Step 2: Industry Context -->
+        <div class="step" id="step2">
+            <div class="step-header">🏭 Step 2: Industry & Product Context</div>
+            <p><strong>Limit:</strong> 500 characters</p>
+            
+            <input type="text" id="industry-context" placeholder="Describe your industry and product category..." maxlength="500">
+            <div class="word-counter" id="context-counter">0/500 characters</div>
+            
+            <button id="save-context-btn">Save Context</button>
+        </div>
+        
+        <!-- Step 3: Keyword Extraction -->
+        <div class="step" id="step3">
+            <div class="step-header">🤖 Step 3: AI Keyword Extraction</div>
+            <p><strong>🔒 Security:</strong> API keys processed in-memory only, never stored</p>
+            
+            <select id="genai-service">
+                <option value="openai">OpenAI GPT</option>
+                <option value="anthropic">Anthropic Claude</option>
+                <option value="google">Google Gemini</option>
+            </select>
+            
+            <input type="password" id="api-key" placeholder="Enter your API key (will be cleared after use)">
+            
+            <button id="extract-keywords-btn">Extract Keywords</button>
+            
+            <div id="keywords-result" class="hidden">
+                <p><strong>Extracted Keywords:</strong></p>
+                <div class="keyword-list" id="keyword-list"></div>
+            </div>
+        </div>
+        
+        <!-- Step 4: Quantitative Data -->
+        <div class="step" id="step4">
+            <div class="step-header">📊 Step 4: Quantitative Survey Data</div>
+            <p><strong>Requirements:</strong> 30+ respondents, 3-20 questions, 1-9 rating scale</p>
+            
+            <div class="file-drop" id="quantitative-drop">
+                <p>📊 Drag & drop CSV/JSON files here or click to browse</p>
+                <input type="file" id="quantitative-file" accept=".csv,.json" style="display: none;">
+                <button onclick="document.getElementById('quantitative-file').click()">Browse Files</button>
+            </div>
+            
+            <div id="quantitative-summary" class="analysis-summary hidden">
+                <h4>Data Summary:</h4>
+                <div id="data-summary-content"></div>
+            </div>
+        </div>
+        
+        <!-- Step 5: Generate Analysis -->
+        <div class="step" id="step5">
+            <div class="step-header">🎯 Step 5: Generate Analysis</div>
+            
+            <button id="generate-analysis-btn" disabled>Generate Perceptual Maps</button>
+            
+            <div id="analysis-options" class="hidden">
+                <h4>Select Dimensions for Perceptual Map:</h4>
+                <select id="x-dimension"></select>
+                <select id="y-dimension"></select>
+                <button id="create-map-btn">Create Map</button>
+            </div>
+            
+            <div id="final-results" class="analysis-summary hidden">
+                <h4>🎉 Analysis Complete!</h4>
+                <div id="results-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Real-time text validation
+        document.getElementById('qualitative-text').addEventListener('input', function() {
+            const text = this.value;
+            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            
+            // Update counter
+            document.getElementById('word-counter').textContent = wordCount.toLocaleString() + ' words';
+            
+            // Update progress bar
+            const progress = Math.min(100, (wordCount / 2000) * 100);
+            document.getElementById('text-progress').style.width = progress + '%';
+            
+            // Real-time validation
+            fetch('/validate_text', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: text})
+            })
+            .then(response => response.json())
+            .then(data => {
+                const counter = document.getElementById('word-counter');
+                counter.className = 'word-counter ' + data.status;
+                counter.textContent = data.message;
+                
+                if (data.warnings && data.warnings.length > 0) {
+                    counter.textContent += ' (' + data.warnings.join(', ') + ')';
+                }
+            });
+        });
+        
+        // Industry context character counter
+        document.getElementById('industry-context').addEventListener('input', function() {
+            const length = this.value.length;
+            document.getElementById('context-counter').textContent = length + '/500 characters';
+        });
+        
+        // File upload handling
+        function setupFileUpload(dropId, fileId, fileType) {
+            const dropZone = document.getElementById(dropId);
+            const fileInput = document.getElementById(fileId);
+            
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0], fileType);
+                }
+            });
+            
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    handleFileUpload(this.files[0], fileType);
+                }
+            });
+        }
+        
+        function handleFileUpload(file, fileType) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('file_type', fileType);
+            
+            fetch('/upload_file', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (fileType === 'qualitative') {
+                        document.getElementById('qualitative-text').value = data.data;
+                        document.getElementById('qualitative-text').dispatchEvent(new Event('input'));
+                    } else if (fileType === 'quantitative') {
+                        displayQuantitativeData(data);
+                    }
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+        
+        function displayQuantitativeData(data) {
+            const summary = document.getElementById('quantitative-summary');
+            const content = document.getElementById('data-summary-content');
+            
+            content.innerHTML = 
+                '<p><strong>Rows:</strong> ' + data.summary.rows.toLocaleString() + '</p>' +
+                '<p><strong>Columns:</strong> ' + data.summary.columns + '</p>' +
+                '<p><strong>Numeric Columns:</strong> ' + data.summary.numeric_columns + '</p>' +
+                (data.warnings.length > 0 ? '<p class="warning"><strong>Warnings:</strong> ' + data.warnings.join(', ') + '</p>' : '');
+            
+            summary.classList.remove('hidden');
+            
+            // Store data for analysis
+            window.quantitativeData = data.data;
+            
+            // Enable analysis generation
+            document.getElementById('generate-analysis-btn').disabled = false;
+        }
+        
+        // Setup file uploads
+        setupFileUpload('qualitative-drop', 'qualitative-file', 'qualitative');
+        setupFileUpload('quantitative-drop', 'quantitative-file', 'quantitative');
+        
+        // Keyword extraction
+        document.getElementById('extract-keywords-btn').addEventListener('click', function() {
+            const qualitativeText = document.getElementById('qualitative-text').value;
+            const industryContext = document.getElementById('industry-context').value;
+            const service = document.getElementById('genai-service').value;
+            const apiKey = document.getElementById('api-key').value;
+            
+            if (!qualitativeText || !industryContext || !apiKey) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            this.textContent = 'Extracting...';
+            this.disabled = true;
+            
+            fetch('/extract_keywords', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    qualitative_text: qualitativeText,
+                    industry_context: industryContext,
+                    service: service,
+                    api_key: apiKey
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const keywordList = document.getElementById('keyword-list');
+                    keywordList.innerHTML = '';
+                    
+                    data.keywords.forEach(keyword => {
+                        const tag = document.createElement('span');
+                        tag.className = 'keyword-tag';
+                        tag.textContent = keyword;
+                        keywordList.appendChild(tag);
+                    });
+                    
+                    document.getElementById('keywords-result').classList.remove('hidden');
+                } else {
+                    alert('Keyword extraction failed: ' + data.message);
+                }
+            })
+            .finally(() => {
+                this.textContent = 'Extract Keywords';
+                this.disabled = false;
+                // Clear API key for security
+                document.getElementById('api-key').value = '';
+            });
+        });
+        
+        // Generate analysis
+        document.getElementById('generate-analysis-btn').addEventListener('click', function() {
+            if (!window.quantitativeData) {
+                alert('Please upload quantitative data first');
+                return;
+            }
+            
+            this.textContent = 'Generating...';
+            this.disabled = true;
+            
+            fetch('/generate_analysis', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    quantitative_data: window.quantitativeData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Populate dimension selectors
+                    const xSelect = document.getElementById('x-dimension');
+                    const ySelect = document.getElementById('y-dimension');
+                    
+                    xSelect.innerHTML = '';
+                    ySelect.innerHTML = '';
+                    
+                    data.available_dimensions.forEach(dim => {
+                        const option1 = new Option(dim.replace('_', ' '), dim);
+                        const option2 = new Option(dim.replace('_', ' '), dim);
+                        xSelect.add(option1);
+                        ySelect.add(option2);
+                    });
+                    
+                    document.getElementById('analysis-options').classList.remove('hidden');
+                } else {
+                    alert('Analysis generation failed: ' + data.error);
+                }
+            })
+            .finally(() => {
+                this.textContent = 'Generate Perceptual Maps';
+                this.disabled = false;
+            });
+        });
+        
+        // Create specific map
+        document.getElementById('create-map-btn').addEventListener('click', function() {
+            const xDim = document.getElementById('x-dimension').value;
+            const yDim = document.getElementById('y-dimension').value;
+            
+            if (xDim === yDim) {
+                alert('Please select different dimensions for X and Y axes');
+                return;
+            }
+            
+            this.textContent = 'Creating Map...';
+            this.disabled = true;
+            
+            fetch('/create_map', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    x_dimension: xDim,
+                    y_dimension: yDim,
+                    quantitative_data: window.quantitativeData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const results = document.getElementById('results-content');
+                    results.innerHTML += '<p>✅ ' + data.message + '</p>';
+                    
+                    // Display the generated map
+                    if (data.map_url) {
+                        results.innerHTML += `
+                            <div style="margin-top: 20px; text-align: center;">
+                                <img src="${data.map_url}" alt="Perceptual Map" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
+                            </div>
+                        `;
+                    }
+                    
+                    document.getElementById('final-results').classList.remove('hidden');
+                } else {
+                    alert('Map creation failed: ' + data.error);
+                }
+            })
+            .finally(() => {
+                this.textContent = 'Create Map';
+                this.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
