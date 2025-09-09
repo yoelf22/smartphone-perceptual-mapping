@@ -219,6 +219,7 @@
                 <p style="margin: 10px 0;">or</p>
                 <input type="file" id="survey-file" accept=".csv" style="display: none;">
                 <button onclick="document.getElementById('survey-file').click()">Browse Files</button>
+                <button onclick="loadSampleData()" style="margin-left: 10px; background: #2196F3;">Load Sample Data</button>
             </div>
             
             <div id="data-preview" class="data-preview hidden"></div>
@@ -320,15 +321,30 @@
 
             Papa.parse(file, {
                 header: true,
+                skipEmptyLines: true,
+                trimHeaders: true,
+                dynamicTyping: true,  // Automatically convert numbers
                 complete: function(results) {
                     if (results.errors.length > 0) {
-                        alert('Error parsing CSV: ' + results.errors[0].message);
-                        return;
+                        console.log('CSV parsing errors:', results.errors);
+                        // Only show critical errors, not warnings
+                        const criticalErrors = results.errors.filter(err => err.type === 'Delimiter' || err.type === 'Quotes');
+                        if (criticalErrors.length > 0) {
+                            alert('Error parsing CSV: ' + criticalErrors[0].message);
+                            return;
+                        }
                     }
                     
                     surveyData = results.data.filter(row => {
-                        return Object.values(row).some(val => val && val.toString().trim() !== '');
+                        // More robust filtering - check if row has meaningful data
+                        const values = Object.values(row);
+                        return values.length > 1 && values.some(val => val !== null && val !== undefined && val.toString().trim() !== '');
                     });
+                    
+                    if (surveyData.length === 0) {
+                        alert('No valid data found in CSV file. Please check the format.');
+                        return;
+                    }
                     
                     displayDataPreview();
                     analyzeData();
@@ -633,6 +649,46 @@
             // Add new status
             step.classList.add(status === 'active' ? 'active' : status);
             indicator.classList.add(`status-${status}`);
+        }
+
+        // Load sample data function
+        function loadSampleData() {
+            const sampleCSV = `phone_model,design,price_value,camera_quality,battery_life,performance,build_quality,user_interface,innovation
+iPhone 15 Pro,8.5,6.2,9.1,7.8,9.2,8.9,8.7,8.4
+iPhone 15,8.2,6.8,8.7,7.5,8.8,8.6,8.5,8.1
+Samsung Galaxy S24 Ultra,8.4,6.5,9.0,8.1,8.9,8.7,8.2,8.6
+Samsung Galaxy S24,8.1,7.2,8.5,8.0,8.4,8.3,8.0,8.2
+Samsung Galaxy A54,7.5,7.9,7.8,8.5,7.6,7.8,7.7,7.2
+Google Pixel 8 Pro,7.9,7.1,8.8,7.4,8.1,8.2,8.4,8.7
+Google Pixel 8,7.6,7.8,8.5,7.2,7.9,8.0,8.2,8.4
+OnePlus 12,8.0,7.6,8.2,8.3,8.7,8.4,7.9,8.1
+OnePlus 11,7.8,7.9,8.0,8.1,8.3,8.1,7.8,7.8
+Xiaomi 14 Pro,7.7,8.5,8.1,8.2,8.0,7.9,7.5,8.3
+Xiaomi Redmi Note 13,6.9,8.8,7.2,8.7,7.1,7.2,7.1,7.0
+Nothing Phone 2,7.4,7.3,7.6,7.9,7.5,7.6,8.0,8.9`;
+
+            // Parse the sample data
+            Papa.parse(sampleCSV, {
+                header: true,
+                skipEmptyLines: true,  // Add this to handle empty lines
+                complete: function(results) {
+                    if (results.errors.length > 0) {
+                        console.log('Sample data errors:', results.errors);
+                        alert('Error loading sample data: ' + results.errors[0].message);
+                        return;
+                    }
+                    
+                    surveyData = results.data.filter(row => {
+                        // More robust filtering
+                        return Object.values(row).some(val => val && val.toString().trim() !== '' && val.toString().trim() !== '');
+                    });
+                    
+                    displayDataPreview();
+                    analyzeData();
+                    updateStepStatus('step1', 'completed');
+                    updateStepStatus('step2', 'active');
+                }
+            });
         }
 
         // Event listeners
