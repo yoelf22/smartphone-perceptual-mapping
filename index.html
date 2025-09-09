@@ -205,11 +205,37 @@
         <h1>🎯 Perceptual Mapping Analyzer</h1>
         <p class="subtitle">Upload survey data to generate interactive perceptual maps and competitive analysis</p>
         
-        <!-- Step 1: Survey Data Upload -->
+        <!-- Step 1: Qualitative Research Input -->
         <div class="step active" id="step1">
             <div class="step-header">
                 <span class="status-indicator status-active"></span>
-                📊 Step 1: Survey Data Upload
+                📝 Step 1: Qualitative Research Input (Optional)
+            </div>
+            <p><strong>Purpose:</strong> Generate research dimensions from qualitative data (interviews, surveys, etc.)</p>
+            
+            <div class="file-drop" id="text-drop">
+                <div style="font-size: 48px; margin-bottom: 15px;">📝</div>
+                <p><strong>Drag & drop text files here</strong></p>
+                <p style="margin: 10px 0;">or</p>
+                <input type="file" id="text-file" accept=".txt" style="display: none;">
+                <button onclick="document.getElementById('text-file').click()">Browse Text Files</button>
+            </div>
+            
+            <p><strong>Or paste text directly:</strong></p>
+            <textarea id="qualitative-text" placeholder="Paste your qualitative research data here (interviews, discussions, survey responses, etc.)..."></textarea>
+            
+            <div class="info-box">
+                <strong>💡 Tip:</strong> This step helps identify key dimensions for your perceptual map. You can skip this and proceed directly to survey data upload.
+            </div>
+            
+            <button onclick="skipToSurveyData()">Skip to Survey Data →</button>
+        </div>
+
+        <!-- Step 2: Survey Data Upload -->
+        <div class="step" id="step2">
+            <div class="step-header">
+                <span class="status-indicator status-pending"></span>
+                📊 Step 2: Survey Data Upload
             </div>
             <p><strong>Requirements:</strong> CSV file with survey responses (30+ respondents, rating scale 1-9)</p>
             
@@ -218,7 +244,7 @@
                 <p><strong>Drag & drop your CSV file here</strong></p>
                 <p style="margin: 10px 0;">or</p>
                 <input type="file" id="survey-file" accept=".csv" style="display: none;">
-                <button onclick="document.getElementById('survey-file').click()">Browse Files</button>
+                <button onclick="document.getElementById('survey-file').click()">Browse CSV Files</button>
                 <button onclick="loadSampleData()" style="margin-left: 10px; background: #2196F3;">Load Sample Data</button>
             </div>
             
@@ -226,11 +252,11 @@
             <div id="data-summary" class="analysis-summary hidden"></div>
         </div>
         
-        <!-- Step 2: Map Configuration -->
-        <div class="step" id="step2">
+        <!-- Step 3: Map Configuration -->
+        <div class="step" id="step3">
             <div class="step-header">
                 <span class="status-indicator status-pending"></span>
-                ⚙️ Step 2: Configure Perceptual Map
+                ⚙️ Step 3: Configure Perceptual Map
             </div>
             
             <div class="dimensions-grid">
@@ -255,11 +281,11 @@
             <button id="generate-map-btn" disabled>Generate Perceptual Map</button>
         </div>
         
-        <!-- Step 3: Results -->
-        <div class="step" id="step3">
+        <!-- Step 4: Results -->
+        <div class="step" id="step4">
             <div class="step-header">
                 <span class="status-indicator status-pending"></span>
-                📈 Step 3: Interactive Perceptual Map
+                📈 Step 4: Interactive Perceptual Map
             </div>
             
             <div id="map-container" class="map-container hidden">
@@ -319,39 +345,55 @@
                 return;
             }
 
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                trimHeaders: true,
-                dynamicTyping: true,  // Automatically convert numbers
-                complete: function(results) {
-                    if (results.errors.length > 0) {
-                        console.log('CSV parsing errors:', results.errors);
-                        // Only show critical errors, not warnings
-                        const criticalErrors = results.errors.filter(err => err.type === 'Delimiter' || err.type === 'Quotes');
-                        if (criticalErrors.length > 0) {
-                            alert('Error parsing CSV: ' + criticalErrors[0].message);
+            // Read file as text first to debug
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvText = e.target.result;
+                console.log('Raw CSV content (first 500 chars):', csvText.substring(0, 500));
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    trimHeaders: true,
+                    dynamicTyping: false,  // Keep as strings initially to avoid conversion issues
+                    complete: function(results) {
+                        console.log('Papa Parse results:', results);
+                        
+                        if (results.errors.length > 0) {
+                            console.log('CSV parsing errors:', results.errors);
+                            // Show all errors for debugging
+                            alert('CSV parsing errors found:\n' + results.errors.map(err => `Row ${err.row}: ${err.message}`).join('\n'));
                             return;
                         }
+                        
+                        if (!results.data || results.data.length === 0) {
+                            alert('No data found in CSV file.');
+                            return;
+                        }
+                        
+                        // More robust data filtering
+                        surveyData = results.data.filter(row => {
+                            const values = Object.values(row);
+                            const hasData = values.some(val => val !== null && val !== undefined && val.toString().trim() !== '');
+                            console.log('Row data:', row, 'Has data:', hasData);
+                            return hasData;
+                        });
+                        
+                        console.log('Filtered survey data:', surveyData);
+                        
+                        if (surveyData.length === 0) {
+                            alert('No valid data rows found in CSV file. Please check the format.');
+                            return;
+                        }
+                        
+                        displayDataPreview();
+                        analyzeData();
+                        updateStepStatus('step2', 'completed');
+                        updateStepStatus('step3', 'active');
                     }
-                    
-                    surveyData = results.data.filter(row => {
-                        // More robust filtering - check if row has meaningful data
-                        const values = Object.values(row);
-                        return values.length > 1 && values.some(val => val !== null && val !== undefined && val.toString().trim() !== '');
-                    });
-                    
-                    if (surveyData.length === 0) {
-                        alert('No valid data found in CSV file. Please check the format.');
-                        return;
-                    }
-                    
-                    displayDataPreview();
-                    analyzeData();
-                    updateStepStatus('step1', 'completed');
-                    updateStepStatus('step2', 'active');
-                }
-            });
+                });
+            };
+            reader.readAsText(file);
         }
 
         function displayDataPreview() {
@@ -507,8 +549,8 @@
             // Create Plotly visualization
             createPlotlyMap(plotData, xDim, yDim);
             
-            updateStepStatus('step2', 'completed');
-            updateStepStatus('step3', 'active');
+            updateStepStatus('step3', 'completed');
+            updateStepStatus('step4', 'active');
             document.getElementById('map-container').classList.remove('hidden');
         }
 
@@ -685,8 +727,8 @@ Nothing Phone 2,7.4,7.3,7.6,7.9,7.5,7.6,8.0,8.9`;
                     
                     displayDataPreview();
                     analyzeData();
-                    updateStepStatus('step1', 'completed');
-                    updateStepStatus('step2', 'active');
+                    updateStepStatus('step2', 'completed');
+                    updateStepStatus('step3', 'active');
                 }
             });
         }
@@ -694,8 +736,62 @@ Nothing Phone 2,7.4,7.3,7.6,7.9,7.5,7.6,8.0,8.9`;
         // Event listeners
         document.getElementById('generate-map-btn').addEventListener('click', generatePerceptualMap);
 
+        // Skip to survey data function
+        function skipToSurveyData() {
+            updateStepStatus('step1', 'completed');
+            updateStepStatus('step2', 'active');
+        }
+
+        // Text file handling
+        function setupTextFileUpload() {
+            const dropZone = document.getElementById('text-drop');
+            const fileInput = document.getElementById('text-file');
+            
+            // Drag and drop events
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleTextFileUpload(files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleTextFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        function handleTextFileUpload(file) {
+            if (!file.name.toLowerCase().endsWith('.txt')) {
+                alert('Please upload a text file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('qualitative-text').value = e.target.result;
+                alert('Text file loaded! You can now review and edit the content, then proceed to survey data.');
+            };
+            reader.readAsText(file);
+        }
+
         // Initialize
         setupFileUpload();
+        setupTextFileUpload();
     </script>
 </body>
 </html>
