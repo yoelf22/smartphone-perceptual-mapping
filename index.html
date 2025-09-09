@@ -459,11 +459,14 @@ Start typing or paste text here..."></textarea>
             preview.classList.remove('hidden');
         }
 
+        // Global variable to store extracted dimensions
+        let extractedQualitativeDimensions = [];
+
         function analyzeData() {
             if (!surveyData || surveyData.length === 0) return;
 
-            // Clear any previous extracted dimensions from qualitative analysis
-            document.getElementById('extracted-dimensions').classList.add('hidden');
+            // Check for dimension mismatch between qualitative and quantitative data
+            checkDimensionAlignment();
 
             // Find identifier column (product names)
             const columns = Object.keys(surveyData[0]);
@@ -962,16 +965,30 @@ Start typing or paste text here..."></textarea>
             const reader = new FileReader();
             reader.onload = function(e) {
                 const textarea = document.getElementById('qualitative-text');
+                const wordCounter = document.getElementById('text-word-counter');
+                const processBtn = document.getElementById('process-text-btn');
+                
                 textarea.value = e.target.result;
                 
-                // Trigger the input event to update word counter and button state
-                const inputEvent = new Event('input', {
-                    bubbles: true,
-                    cancelable: true,
-                });
-                textarea.dispatchEvent(inputEvent);
+                // Manually update word counter and button state
+                const text = e.target.result;
+                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
                 
-                alert('Text file loaded! You can now review and edit the content, then proceed to survey data.');
+                if (wordCounter) {
+                    wordCounter.textContent = wordCount.toLocaleString() + ' words';
+                }
+                
+                if (processBtn) {
+                    processBtn.disabled = wordCount < 50;
+                    
+                    if (wordCount < 50) {
+                        processBtn.textContent = '🤖 Process Text & Extract Dimensions (min 50 words)';
+                    } else {
+                        processBtn.textContent = '🤖 Process Text & Extract Dimensions';
+                    }
+                }
+                
+                alert(`Text file loaded with ${wordCount.toLocaleString()} words! You can now review and edit the content, then process dimensions.`);
             };
             reader.readAsText(file);
         }
@@ -1039,6 +1056,9 @@ Start typing or paste text here..."></textarea>
             const dimensionsDiv = document.getElementById('dimensions-list');
             const extractedDiv = document.getElementById('extracted-dimensions');
             
+            // Store dimensions globally for comparison
+            extractedQualitativeDimensions = dimensions;
+            
             if (dimensions.length === 0) {
                 dimensionsDiv.innerHTML = '<p class="warning-box">No clear dimensions found in the text. Consider adding more descriptive content or skip to manual survey data upload.</p>';
             } else {
@@ -1056,6 +1076,90 @@ Start typing or paste text here..."></textarea>
             }
             
             extractedDiv.classList.remove('hidden');
+        }
+
+        // Check alignment between qualitative dimensions and CSV columns
+        function checkDimensionAlignment() {
+            if (!extractedQualitativeDimensions.length || !surveyData.length) {
+                return; // No qualitative dimensions to compare
+            }
+
+            const columns = Object.keys(surveyData[0]);
+            const identifierKeywords = ['phone', 'product', 'brand', 'model', 'device', 'name', 'item', 'respondent', 'id'];
+            
+            // Get non-identifier columns (potential rating dimensions)
+            const csvDimensions = columns.filter(col => {
+                return !identifierKeywords.some(keyword => col.toLowerCase().includes(keyword));
+            });
+
+            // Compare qualitative dimensions with CSV dimensions
+            const qualitativeDimNames = extractedQualitativeDimensions.map(d => d.name.toLowerCase());
+            const csvDimNames = csvDimensions.map(d => d.toLowerCase().replace(/_/g, ' '));
+            
+            const matches = [];
+            const csvOnlyDims = [];
+            const qualitativeOnlyDims = [];
+
+            // Find matches and differences
+            csvDimensions.forEach(csvDim => {
+                const csvDimClean = csvDim.toLowerCase().replace(/_/g, ' ');
+                const hasMatch = qualitativeDimNames.some(qualDim => {
+                    return qualDim.replace(/_/g, ' ') === csvDimClean || 
+                           qualDim.replace(/_/g, ' ').includes(csvDimClean.split(' ')[0]) ||
+                           csvDimClean.includes(qualDim.replace(/_/g, ' ').split(' ')[0]);
+                });
+                
+                if (hasMatch) {
+                    matches.push(csvDim);
+                } else {
+                    csvOnlyDims.push(csvDim);
+                }
+            });
+
+            extractedQualitativeDimensions.forEach(qualDim => {
+                const qualDimClean = qualDim.name.toLowerCase().replace(/_/g, ' ');
+                const hasMatch = csvDimNames.some(csvDim => {
+                    return csvDim === qualDimClean || 
+                           csvDim.includes(qualDimClean.split(' ')[0]) ||
+                           qualDimClean.includes(csvDim.split(' ')[0]);
+                });
+                
+                if (!hasMatch) {
+                    qualitativeOnlyDims.push(qualDim.displayName);
+                }
+            });
+
+            // Display alignment results
+            showDimensionAlignmentResults(matches, csvOnlyDims, qualitativeOnlyDims);
+        }
+
+        // Show dimension alignment notification
+        function showDimensionAlignmentResults(matches, csvOnly, qualitativeOnly) {
+            const summaryDiv = document.getElementById('data-summary');
+            
+            let alignmentHtml = '<div style="margin-top: 20px; padding: 15px; border-left: 4px solid #2196F3; background: #e3f2fd;">';
+            alignmentHtml += '<h4 style="margin: 0 0 10px 0; color: #1976D2;">📊 Dimension Alignment Analysis</h4>';
+            
+            if (matches.length > 0) {
+                alignmentHtml += `<p><strong>✅ Matching dimensions (${matches.length}):</strong> ${matches.join(', ')}</p>`;
+            }
+            
+            if (csvOnly.length > 0) {
+                alignmentHtml += `<p><strong>📈 Additional CSV dimensions (${csvOnly.length}):</strong> ${csvOnly.join(', ')}</p>`;
+                alignmentHtml += '<p style="font-size: 0.9em; color: #666;"><em>These dimensions from your CSV data will be available for mapping.</em></p>';
+            }
+            
+            if (qualitativeOnly.length > 0) {
+                alignmentHtml += `<p><strong>📝 Qualitative-only dimensions (${qualitativeOnly.length}):</strong> ${qualitativeOnly.join(', ')}</p>`;
+                alignmentHtml += '<p style="font-size: 0.9em; color: #666;"><em>These dimensions were identified in your text but not found in the CSV data.</em></p>';
+            }
+            
+            alignmentHtml += '<p style="margin-top: 10px;"><strong>💡 Result:</strong> Using CSV dimensions for perceptual mapping. You can create maps with any of the available CSV dimensions above.</p>';
+            alignmentHtml += '</div>';
+            
+            // Insert alignment info into the existing summary
+            const currentContent = summaryDiv.innerHTML;
+            summaryDiv.innerHTML = currentContent + alignmentHtml;
         }
 
         // Initialize when DOM is ready
