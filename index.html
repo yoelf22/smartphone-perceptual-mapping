@@ -215,6 +215,23 @@
             margin: 10px 0;
             font-weight: 500;
         }
+        .keyword-list { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            margin: 10px 0; 
+            line-height: 1.8;
+        }
+        .keyword-tag { 
+            background: #e3f2fd; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.9em; 
+            display: inline-block;
+            position: relative;
+            margin: 2px;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -597,12 +614,12 @@ Start typing or paste text here..."></textarea>
         }
 
         function createPlotlyMap(plotData, xDim, yDim) {
-            // Prepare data for Plotly
+            // Prepare data for Plotly - markers only (no text)
             const trace = {
                 x: plotData.map(d => d.x),
                 y: plotData.map(d => d.y),
                 text: plotData.map(d => `${d.product}<br>Responses: ${d.frequency}`),
-                mode: 'markers+text',
+                mode: 'markers', // Remove text mode - we'll use annotations instead
                 marker: {
                     size: plotData.map(d => Math.sqrt(d.size) / 2 * 1.3), // 30% larger bubbles for Plotly
                     color: plotData.map((d, i) => {
@@ -617,15 +634,50 @@ Start typing or paste text here..."></textarea>
                         width: 1.5
                     }
                 },
-                textposition: 'middle left',
-                textfont: {
-                    size: 12,
-                    family: 'Arial, sans-serif'
-                },
                 hovertemplate: '<b>%{text}</b><br>' +
                               xDim.replace(/_/g, ' ') + ': %{x:.1f}<br>' +
                               yDim.replace(/_/g, ' ') + ': %{y:.1f}<extra></extra>'
             };
+
+            // Create custom annotations for labels with leader lines
+            const labelAnnotations = plotData.map((d, i) => {
+                const brand = d.product.split(/[\s-]/)[0];
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA726', '#AB47BC', '#66BB6A', '#EF5350', '#26A69A'];
+                const bubbleColor = colors[brand.charCodeAt(0) % colors.length];
+                
+                // Calculate bubble radius in data units (approximate)
+                const bubbleRadius = Math.sqrt(d.size) / 2 * 1.3;
+                const radiusInDataUnits = bubbleRadius * 0.02; // Rough conversion
+                
+                // Position label to the left at radius + 30px equivalent in data units
+                const labelOffset = radiusInDataUnits + 0.3; // 30px equivalent
+                const labelX = d.x - labelOffset;
+                
+                return {
+                    x: labelX,
+                    y: d.y,
+                    text: d.product,
+                    showarrow: true,
+                    arrowhead: 0,
+                    arrowsize: 1,
+                    arrowwidth: 2,
+                    arrowcolor: bubbleColor,
+                    ax: d.x, // Point to the center of the circle
+                    ay: d.y,
+                    font: {
+                        size: 11,
+                        color: 'white',
+                        family: 'Arial, sans-serif'
+                    },
+                    bgcolor: bubbleColor,
+                    opacity: 0.9,
+                    bordercolor: 'black',
+                    borderwidth: 1,
+                    borderpad: 4,
+                    xanchor: 'right',
+                    yanchor: 'middle'
+                };
+            });
 
             // Calculate auto-zoom range
             const xValues = plotData.map(d => d.x);
@@ -706,7 +758,7 @@ Start typing or paste text here..."></textarea>
                         bgcolor: 'lightyellow', opacity: 0.8,
                         bordercolor: 'black', borderwidth: 1
                     }
-                ],
+                ].concat(labelAnnotations), // Add product labels with leader lines
                 showlegend: false,
                 plot_bgcolor: 'white',
                 paper_bgcolor: 'white'
