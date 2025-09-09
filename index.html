@@ -80,7 +80,7 @@
             background: #f9f9f9;
         }
         textarea { 
-            width: calc(100% - 22px); 
+            width: calc(100% - 32px); 
             min-height: 200px; 
             padding: 15px; 
             border: 2px solid #e8ecf0; 
@@ -89,6 +89,9 @@
             font-size: 14px;
             line-height: 1.5;
             resize: vertical;
+            display: block;
+            margin: 10px 0;
+            background-color: white;
         }
         input[type="text"], select { 
             width: calc(100% - 22px); 
@@ -198,6 +201,20 @@
             margin: 15px 0;
             color: #155724;
         }
+        #qualitative-text {
+            width: calc(100% - 32px) !important;
+            min-height: 200px !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            box-sizing: border-box !important;
+        }
+        #text-word-counter {
+            font-size: 0.9em;
+            color: #666;
+            margin: 10px 0;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -221,8 +238,19 @@
                 <button onclick="document.getElementById('text-file').click()">Browse Text Files</button>
             </div>
             
-            <p><strong>Or paste text directly:</strong></p>
-            <textarea id="qualitative-text" placeholder="Paste your qualitative research data here (interviews, discussions, survey responses, etc.)..."></textarea>
+            <div style="margin: 20px 0;">
+                <h4 style="margin-bottom: 10px; color: #333;">📝 Paste Your Qualitative Text:</h4>
+                <textarea id="qualitative-text" placeholder="Paste your qualitative research data here (interviews, discussions, survey responses, etc.)...
+
+Examples:
+• Interview transcripts
+• User feedback
+• Product reviews  
+• Focus group notes
+• Market research text
+
+Start typing or paste text here..."></textarea>
+            </div>
             
             <div class="info-box">
                 <strong>💡 Tip:</strong> This step helps identify key dimensions for your perceptual map. You can skip this and proceed directly to survey data upload.
